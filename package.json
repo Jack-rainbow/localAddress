@@ -1,0 +1,35 @@
+{
+  "name": "localAddress",
+  "version": "0.0.1",
+  "description": "四级地址库本地化方案",
+  "main": "src/main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jack-rainbow/localAddress.git"
+  },
+  "keywords": [
+    "javascript",
+    "localAddress",
+    "address",
+    "browser"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "browserify": "^16.2.3",
+    "del": "^3.0.0",
+    "gulp": "^4.0.0",
+    "gulp-sourcemaps": "^2.6.4",
+    "gulp-uglify": "^3.0.1",
+    "gulp-util": "^3.0.8",
+    "lodash": "^4.17.11",
+    "minimist": "^1.2.0",
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0"
+  },
+  "scripts": {
+    "build": "npm install && gulp",
+    "test": "gulp && gulp test"
+  },
+  "author": "Afon",
+  "license": "MIT"
+}
