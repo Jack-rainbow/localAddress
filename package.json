@@ -1,6 +1,6 @@
 {
-  "name": "localAddress",
-  "version": "0.0.1",
+  "name": "local-address",
+  "version": "1.0.0",
   "description": "四级地址库本地化方案",
   "main": "src/main.js",
   "repository": {
@@ -30,6 +30,6 @@
     "build": "npm install && gulp",
     "test": "gulp && gulp test"
   },
-  "author": "Afon",
+  "author": "ycl",
   "license": "MIT"
 }

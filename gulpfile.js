@@ -13,14 +13,14 @@ var _ = require('lodash');
 var hasOwn = {}.hasOwnProperty;
 
 var scriptSrcFiles = 'src/**/*.js';
-var destJsFile = 'pingpp.js';
+var destJsFile = 'localAddress.js';
 var entries = ['./src/main.js'];
 var distDir = './dist/';
 var distFiles = [
   distDir + '/' + destJsFile,
   distDir + '/' + destJsFile + '.map'
 ];
-var releaseObjectName = 'pingpp';
+var releaseObjectName = 'localAddress';
 var channelsDir = './channels/';
 var channelsDirPath = __dirname + '/src/channels/';
 var replaceChannelsPattern = '<<REPLACE-CHANNELS>>';
@@ -53,7 +53,7 @@ function build(cb) {
     }))
     .pipe(uglify({
       mangle: {
-        reserved: ['PingppSDK']
+        reserved: ['localAddressJS']
       },
       output: {
         quote_style: 3,
@@ -70,7 +70,6 @@ function build(cb) {
 function modules(cb) {
   var channels = makeChannelModulesContent();
 
-  var libs = makeLibModulesContent();
   var tmpl = fs.readFileSync(__dirname + '/mods.js.tmpl', 'utf8');
 
   var modsContents = _.replace(tmpl,
@@ -78,7 +77,7 @@ function modules(cb) {
     channels.replacement);
   modsContents = _.replace(modsContents,
     replaceLibsPattern,
-    libs.replacement);
+    '');
   fs.writeFileSync(modsJsFile, modsContents, 'utf8');
   console.log('Enabled channels: ' + channels.enabledChannels);
   cb();
@@ -130,25 +129,7 @@ var makeChannelModulesContent = function() {
   };
 };
 
-var makeLibModulesContent = function() {
-  var extraBaseDir = './channels/extras/';
-  var extranames = [];
-  if (hasOwn.call(cmdOptions, 'alipay_in_weixin') &&
-    cmdOptions.alipay_in_weixin) {
-    extranames.push('ap');
-  }
-  if (hasOwn.call(cmdOptions, 'wx_jssdk') &&
-    cmdOptions.wx_jssdk) {
-    extranames.push('wx_jssdk');
-  }
-  if (hasOwn.call(cmdOptions, 'agreement')) {
-    extranames.push(['agreement', './agreement']);
-  }
 
-  return {
-    replacement: modnames2text(extranames, extraBaseDir)
-  };
-};
 
 var modnames2text = function(modnames, baseDir) {
   if (modnames.length === 0) {
@@ -185,11 +166,6 @@ function watchFiles(cb) {
   cb();
 }
 
-exports.test = function(cb) {
-  var test = require('./test/test.js');
-  test.run();
-  cb();
-};
 exports.build = series(clean, modules, build);
 exports.watch = series(clean, build, watchFiles);
 exports.default = series(build);
