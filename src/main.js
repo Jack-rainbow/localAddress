@@ -47380,24 +47380,97 @@
     window.indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.OIndexedDB || window.msIndexedDB,
                         IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.OIDBTransaction || window.msIDBTransaction,
                         dbVersion = 1;
-
     var dbName= 'address',  provinceNmae = 'province_list', cityNmae = 'city_list', countyNmae = 'county_list', streetName = 'street_list';
     var addressList  = [provinceNmae,cityNmae,countyNmae,streetName]
-    
-    var request = window.indexedDB.open(dbName, dbVersion);
-    request.onupgradeneeded = function(event) {
-        var db = event.target.result;
-        //创建数据库的表格（或者叫数据库仓库）
-        var tableName = db.createObjectStore(dbName, {
-            keyPath:"key",
-            autoIncrement:true
-        })
-        tableName.transaction.oncomplete = function() {
-            var customerObjectStore =  db.transaction(dbName, "readwrite").objectStore(dbName)
-            addressList.forEach(function(v) {
-                customerObjectStore.add(list[v]);
-            })
-        };
+
+    //初始化地址库信息
+    window.addressInfo = {
+        'version': dbVersion,
+        'dbName': dbName,
+        'storeName': dbName,
+        'addressList': addressList
+    }
+    var  addressFactory = function(res) {
+        var _this = Object.create(res);
+        if(this instanceof addressFactory) {
+            var s = new this[res]();
+            return s;
+        } else {
+            return new addressFactory(res);
+        } 
     }
 
+    addressFactory.prototype = {
+        //创建数据库并且加数据
+        create: function() {
+            var request = window.indexedDB.open(dbName, dbVersion);
+            request.onupgradeneeded = function(event) {
+                var db = event.target.result;
+                //创建数据库的表格（或者叫数据库仓库）
+                var tableName = db.createObjectStore(dbName, {
+                    keyPath:"key",
+                    autoIncrement:true
+                })
+                tableName.transaction.oncomplete = function() {
+                    var customerObjectStore =  db.transaction(dbName, "readwrite").objectStore(dbName)
+                    addressList.forEach(function(v) {
+                        customerObjectStore.add(list[v]);
+                    })
+                };
+            }
+        },
+        //查找数据
+        getDataKey: function(db,storeName,value,fn) {
+            var request = window.indexedDB.open(dbName, dbVersion);
+            var transaction = request.transaction(storeName,'readwrite'); 
+            var store = transaction.objectStore(storeName); 
+            var request = store.get(value); 
+            request.onsuccess=function(e){ 
+                var result = e.target.result; 
+                fn(result)
+            };
+        },
+        //利用索引查找数据
+        getDataByIndex(db,storeName,Index,key,fn){
+            var transaction = db.transaction(storeName);
+            var store = transaction.objectStore(storeName);
+            var index = store.index(Index);
+            index.get(key).onsuccess=function(e){
+                var result = e.target.result;
+                fn(result)
+            }
+        },
+        //更新数据库
+        updateDataKey: function(db,storeName,value,fn) {
+            var transaction = db.transaction(storeName,'readwrite'); 
+            var store = transaction.objectStore(storeName); 
+            var request = store.get(value); 
+            request.onsuccess = function(e){ 
+                var result = e.target.result; 
+                fn(store,result)
+                // store.put(result); 
+            };
+        },
+        //删除数据
+        deleteDataKey: function(db,storeName,value) {
+            var transaction = db.transaction(storeName,'readwrite'); 
+            var store = transaction.objectStore(storeName); 
+            store.delete(value); 
+        },
+        //清除事务
+        clearStore: function(db,storeName) {
+            var transaction = db.transaction(storeName,'readwrite'); 
+            var store = transaction.objectStore(storeName); 
+            store.clear();
+        },
+        //关闭数据库
+        close: function(db) {
+            db.close();
+        },
+        //删除数据库
+        deleteDB: function(name) {
+            indexedDB.deleteDatabase(name);
+        }
+    }
+    var creaData = addressFactory('create')
 }()
